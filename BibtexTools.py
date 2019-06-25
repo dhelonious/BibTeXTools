@@ -52,7 +52,7 @@ class BibtexToolsCommand(sublime_plugin.TextCommand):
 
             entry_label_region = self.view.find(r"[^\s,]*", entry_opening.end())
 
-            entry_type = self.view.substr(entry_type_region)
+            entry_type = self.view.substr(entry_type_region).lower()
             entry_label = self.view.substr(entry_label_region)
 
             log("Found {}{{{}}} at lines {}-{}".format(
