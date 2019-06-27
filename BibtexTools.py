@@ -326,17 +326,16 @@ class BibtexToolsSortCommand(BibtexToolsCommand):
 
 class BibtexToolsFetchCommand(BibtexToolsCommand):
 
-    url_pattern = re.compile(r"^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)$")
-
     def run(self, edit):
 
         doi = sublime.get_clipboard()
-        url = "http://dx.doi.org/{}".format(doi)
+        doi_pattern = re.compile(r'\b(10[.][0-9]{4,}(?:[.][0-9]+)*/(?:(?!["&\'<>])\S)+)\b')
 
-        if self.url_pattern.match(url):
+        if doi_pattern.match(doi):
             sublime.status_message("Fetching BibTeX entry")
             log("DOI: {}".format(doi))
 
+            url = "http://dx.doi.org/{}".format(doi)
             request = urllib.request.Request(url)
             request.add_header("Accept", "application/x-bibtex; charset=utf-8")
             result = urllib.request.urlopen(request).read().decode("utf-8")
