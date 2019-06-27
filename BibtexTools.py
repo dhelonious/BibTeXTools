@@ -23,10 +23,12 @@ BibtexField = collections.namedtuple("BibtexField", "name value region")
 
 class BibtexToolsCommand(sublime_plugin.TextCommand):
 
-    settings = sublime.load_settings("BibtexTools.sublime-settings")
-    fields = settings.get("fields")
-    accents = settings.get("accents")
-    accent_pattern = re.compile("|".join(list(accents)))
+    def __init__(self, *args, **kwargs):
+        super(BibtexToolsCommand, self).__init__(*args, **kwargs)
+        self.settings = sublime.load_settings("BibtexTools.sublime-settings")
+        self.fields = self.settings.get("fields")
+        self.accents = self.settings.get("accents")
+        self.accent_pattern = re.compile("|".join(list(self.accents)))
 
     def is_enabled(self):
         file_name = self.view.file_name()
