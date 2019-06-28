@@ -1,14 +1,14 @@
 [
     {
-        "caption": "Format (Bibtex)",
+        "caption": "Format (BibTeX)",
         "command": "bibtex_tools_format"
     },
     {
-        "caption": "Sort (Bibtex)",
+        "caption": "Sort (BibTeX)",
         "command": "bibtex_tools_sort"
     },
     {
-        "caption": "Fetch (Bibtex)",
+        "caption": "Fetch (BibTeX)",
         "command": "bibtex_tools_fetch"
     }
 ]

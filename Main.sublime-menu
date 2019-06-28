@@ -12,14 +12,14 @@
                 "children":
                 [
                     {
-                        "caption": "BibtexTools",
+                        "caption": "BibTeXTools",
                         "children":
                         [
                             {
                                 "caption": "Settings",
                                 "command": "edit_settings",
                                 "args": {
-                                    "base_file": "${packages}/BibtexTools/BibtexTools.sublime-settings",
+                                    "base_file": "${packages}/BibTeXTools/BibTeXTools.sublime-settings",
                                     "default": "// Settings in here override the default settings.\n{\n\t$0\n}\n"
                                 }
                             }

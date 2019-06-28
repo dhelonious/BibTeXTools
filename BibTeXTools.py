@@ -25,7 +25,7 @@ class BibtexToolsCommand(sublime_plugin.TextCommand):
 
     def __init__(self, *args, **kwargs):
         super(BibtexToolsCommand, self).__init__(*args, **kwargs)
-        self.settings = sublime.load_settings("BibtexTools.sublime-settings")
+        self.settings = sublime.load_settings("BibTeXTools.sublime-settings")
         self.fields = self.settings.get("fields")
         self.accents = self.settings.get("accents")
         self.accent_pattern = re.compile("|".join(list(self.accents)))
