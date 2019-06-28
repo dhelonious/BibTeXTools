@@ -174,10 +174,10 @@ class BibtexToolsCommand(sublime_plugin.TextCommand):
             char = self.view.substr(point)
             if char == "\\": # Skip escape sequences
                 point += 1
-            elif char == opening:
-                count += 1
             elif char == closing:
                 count -= 1
+            elif char == opening:
+                count += 1
 
             point += 1
 
