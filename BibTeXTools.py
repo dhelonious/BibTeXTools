@@ -32,7 +32,10 @@ class BibtexToolsCommand(sublime_plugin.TextCommand):
 
     def is_enabled(self):
         file_name = self.view.file_name()
-        return file_name and file_name.split(".")[-1] == "bib"
+        return bool(file_name and file_name.split(".")[-1] == "bib")
+
+    def is_visible(self):
+        return self.is_enabled()
 
     def get_bibtex_entries(self):
 
