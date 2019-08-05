@@ -8,7 +8,7 @@
         "command": "bibtex_tools_sort"
     },
     {
-        "caption": "Fetch (BibTeX)",
+        "caption": "Fetch Entry (BibTeX)",
         "command": "bibtex_tools_fetch"
     }
 ]
