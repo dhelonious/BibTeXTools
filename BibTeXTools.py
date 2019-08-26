@@ -250,6 +250,9 @@ class BibtexToolsCommand(sublime_plugin.TextCommand):
 
         return entry
 
+    def get_url(self, doi):
+        return "https://doi.org/{}".format(doi)
+
 
 class BibtexToolsFormatCommand(BibtexToolsCommand):
 
@@ -295,6 +298,10 @@ class BibtexToolsFormatCommand(BibtexToolsCommand):
                     bibtex_field.value
                 )
 
+            doi = self.entries[bibtex_entry.type][bibtex_entry.label].get("doi", None)
+            if doi and self.settings.get("replace_url"):
+                self.entries[bibtex_entry.type][bibtex_entry.label]["url"] = self.get_url(doi)
+
         if duplicates:
             sublime.error_message(
                 "There were duplicate entries.\nSee the console for details."
@@ -338,8 +345,7 @@ class BibtexToolsFetchCommand(BibtexToolsCommand):
             sublime.status_message("Fetching BibTeX entry")
             log("DOI: {}".format(doi))
 
-            url = "http://dx.doi.org/{}".format(doi)
-            request = urllib.request.Request(url)
+            request = urllib.request.Request(self.get_url(doi))
             request.add_header("Accept", "application/x-bibtex; charset=utf-8")
             result = urllib.request.urlopen(request).read().decode("utf-8")
 
@@ -360,6 +366,9 @@ class BibtexToolsFetchCommand(BibtexToolsCommand):
 
                 field_name, field_value = re.match(pattern, line).groups()
                 entry_fields[field_name] = self.process_field(entry_type, field_name, field_value)
+
+                if self.settings.get("replace_url"):
+                    entry_fields["url"] = self.get_url(doi)
 
             entry = self.format_entry(entry_type, entry_label, entry_fields)
 
