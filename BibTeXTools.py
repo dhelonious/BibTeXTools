@@ -338,7 +338,7 @@ class BibtexToolsFetchCommand(BibtexToolsCommand):
 
     def run(self, edit):
 
-        doi = sublime.get_clipboard()
+        doi = sublime.get_clipboard().strip()
         doi_pattern = re.compile(r'\b(10[.][0-9]{4,}(?:[.][0-9]+)*/(?:(?!["&\'<>])\S)+)\b')
 
         if doi_pattern.match(doi):
@@ -349,7 +349,7 @@ class BibtexToolsFetchCommand(BibtexToolsCommand):
             request.add_header("Accept", "application/x-bibtex; charset=utf-8")
             result = urllib.request.urlopen(request).read().decode("utf-8")
 
-            lines = result.split("\n")
+            lines = result.split(",\n")
             entry_type, entry_label = re.match(r"(@[a-z]+){([^\s,]+)", lines[0]).groups()
             entry_label = entry_label.replace("_", "")
 
@@ -359,7 +359,7 @@ class BibtexToolsFetchCommand(BibtexToolsCommand):
             )
 
             for line in lines[1:-1]:
-                line = line.strip()
+                line = line.strip().replace("\n", "")
                 pattern = r"^([a-z]+) = {(.+)},?$"
                 if line.startswith("year"):
                     pattern = r"^([a-z]+) = ([0-9]+),?$"
