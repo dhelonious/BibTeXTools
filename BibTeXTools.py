@@ -208,6 +208,7 @@ class BibtexToolsCommand(sublime_plugin.TextCommand):
             str: The processed value or an empty string if `field_type` is
                 not a valid field
         """
+
         if not field_name in self.fields[entry_type]:
             return ""
 
@@ -349,7 +350,7 @@ class BibtexToolsFetchCommand(BibtexToolsCommand):
             request.add_header("Accept", "application/x-bibtex; charset=utf-8")
             result = urllib.request.urlopen(request).read().decode("utf-8")
 
-            lines = result.split(",\n")
+            lines = result.split("\n")
             entry_type, entry_label = re.match(r"(@[a-z]+){([^\s,]+)", lines[0]).groups()
             entry_label = entry_label.replace("_", "")
 
