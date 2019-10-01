@@ -359,13 +359,28 @@ class BibtexToolsFetchCommand(BibtexToolsCommand):
                 [(field, "") for field in self.settings.get("fields")[entry_type]]
             )
 
+            # Use APS BibTeX export
+            # NOTE: Currently the entries for APS articles are missing "pages"
+            if doi.startswith("10.1103"):
+                request = urllib.request.Request(self.get_url(doi))
+                aps_url = urllib.request.urlopen(request).geturl()
+                request = urllib.request.Request(
+                    aps_url.replace("abstract", "export") + "?type=bibtex"
+                )
+                result = urllib.request.urlopen(request).read().decode("utf-8")
+                lines = result.split("\n")
+
             for line in lines[1:-1]:
                 line = line.strip().replace("\n", "")
                 pattern = r"^([a-z]+) = {(.+)},?$"
                 if line.startswith("year"):
-                    pattern = r"^([a-z]+) = ([0-9]+),?$"
+                    pattern = r"^([a-z]+) = {?([0-9]+)}?,?$"
 
-                field_name, field_value = re.match(pattern, line).groups()
+                try:
+                    field_name, field_value = re.match(pattern, line).groups()
+                except AttributeError: # Line does not match the pattern
+                    continue
+
                 entry_fields[field_name] = self.process_field(entry_type, field_name, field_value)
 
                 if self.settings.get("replace_url"):
