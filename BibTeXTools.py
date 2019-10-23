@@ -328,9 +328,8 @@ class BibtexToolsSortCommand(BibtexToolsCommand):
         self.view.erase(edit, sublime.Region(0, self.view.size()))
 
         for _, entry_labels in iter(sorted(entries.items())):
-            for i, (_, entry_string) in enumerate(iter(sorted(entry_labels.items()))):
-                if i > 0:
-                    entry_string = "\n\n{}".format(entry_string)
+            for _, entry_string in iter(sorted(entry_labels.items())):
+                entry_string = "\n{}\n".format(entry_string)
 
                 self.view.insert(edit, self.view.size(), entry_string)
 
