@@ -1,11 +1,14 @@
 # encoding: utf-8
 
 import re
+import difflib
 import collections
 import urllib.request
 
 import sublime
 import sublime_plugin
+
+from .util import strip_punct, remove_accents
 
 
 def log(msg):
@@ -21,6 +24,80 @@ BibtexEntry = collections.namedtuple("BibtexEntry", "type label region")
 BibtexField = collections.namedtuple("BibtexField", "name value region")
 
 
+class Abbreviations():
+    """Tries to approximate the ISO-4 abbreviation
+
+    Rules:
+    * articles, conjunctions and prepositions are omitted (except at the beginning)
+    * commas are removed, other punctuation is preserved
+    * diacritics are left as in the original title
+    * words like Part, Series, Section should be omitted
+    * single word titles (possibly with an article or preposition) are not abbreviated
+    * abbreviated words are capitalized
+    """
+
+    def __init__(self):
+        self.abbreviations = sublime.load_settings("BibTeXTools (Abbreviations).sublime-settings")
+        self.ltwa = {self._prepare_ltwa(p): (p, v) for p, v in self.abbreviations.get("LTWA").items()}
+
+    def get(self, name):
+        words = re.split(r"[^\w\d'’\-–&:\.]+", name)
+
+        if len(words) == 1:
+            abbrev = words
+        else:
+            abbrev = []
+
+            for pos, word in enumerate(words):
+                # Remove commas
+                word = word.replace(",", "")
+                _word = remove_accents(word)
+
+                # Ignore articles and shortwords
+                if(pos == 0 and _word in self.abbreviations.get("articles")
+                   or pos > 0 and _word in self.abbreviations.get("articles")+self.abbreviations.get("shortwords")
+                   and not _word.isupper()):
+                    continue
+
+                # Ignore pure punctuations, "Series", "Part", "Section", ...
+                if strip_punct(_word) in ("", "Series", "Serie", "Ser", "Part", "Section", "Sect", "Sec"):
+                    continue
+
+                abbrev.append(self._abbreviate(word))
+
+        return " ".join(abbrev)
+
+    def _abbreviate(self, word):
+        ltwa_patterns = list(self.ltwa.keys())
+        for match in difflib.get_close_matches(word.lower(), ltwa_patterns, n=100):
+            if match in word.lower():
+                pattern, abbrev = self.ltwa[match]
+
+                try:
+                    p = strip_punct(pattern.lower())
+                    left, right = word.lower().split(p)
+                except:
+                    left, right = word.lower().split(remove_accents(p))
+
+                if abbrev.startswith("-"):
+                    abbrev = left + abbrev[1:]
+                if abbrev.endswith("-"):
+                    abbrev = abbrev[:-1] + right
+
+                return abbrev.capitalize()
+
+        return word.capitalize()
+
+    def _prepare_ltwa(self, pattern):
+        pattern = pattern.lower()
+        pattern = remove_accents(pattern)
+        if pattern.startswith("-"):
+            pattern = pattern[1:]
+        if pattern.endswith("-"):
+            pattern = pattern[:-1]
+        return pattern
+
+
 class BibtexToolsCommand(sublime_plugin.TextCommand):
 
     def __init__(self, *args, **kwargs):
@@ -29,6 +106,7 @@ class BibtexToolsCommand(sublime_plugin.TextCommand):
         self.fields = self.settings.get("fields")
         self.accents = self.settings.get("accents")
         self.accent_pattern = re.compile("|".join(list(self.accents)))
+        self.abbreviations = Abbreviations()
 
     def is_enabled(self):
         file_name = self.view.file_name()
@@ -254,6 +332,9 @@ class BibtexToolsCommand(sublime_plugin.TextCommand):
     def get_url(self, doi):
         return "https://doi.org/{}".format(doi)
 
+    def get_abbreviation(self, name):
+        return self.abbreviations.get(name)
+
 
 class BibtexToolsFormatCommand(BibtexToolsCommand):
 
@@ -302,6 +383,10 @@ class BibtexToolsFormatCommand(BibtexToolsCommand):
             doi = self.entries[bibtex_entry.type][bibtex_entry.label].get("doi", None)
             if doi and self.settings.get("replace_url"):
                 self.entries[bibtex_entry.type][bibtex_entry.label]["url"] = self.get_url(doi)
+
+            journal = self.entries[bibtex_entry.type][bibtex_entry.label].get("journal", None)
+            if journal and self.settings.get("abbreviate_journal"):
+                self.entries[bibtex_entry.type][bibtex_entry.label]["journal"] = self.get_abbreviation(journal)
 
         if duplicates:
             sublime.error_message(
@@ -382,8 +467,11 @@ class BibtexToolsFetchCommand(BibtexToolsCommand):
 
                 entry_fields[field_name] = self.process_field(entry_type, field_name, field_value)
 
-                if self.settings.get("replace_url"):
-                    entry_fields["url"] = self.get_url(doi)
+            if self.settings.get("replace_url"):
+                entry_fields["url"] = self.get_url(doi)
+
+            if "journal" in entry_fields and self.settings.get("abbreviate_journal"):
+                entry_fields["journal"] = self.get_abbreviation(entry_fields["journal"])
 
             entry = self.format_entry(entry_type, entry_label, entry_fields)
 

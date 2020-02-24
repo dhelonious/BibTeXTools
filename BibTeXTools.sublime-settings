@@ -2,6 +2,9 @@
     // Replace or add URLs of the form "https://doi.org/..."
     "replace_url": true,
 
+    // Replace journal names by an approximation of its ISO4 abbreviation
+    "abbreviate_journal": true,
+
     // List of BibTeX entries and their fields.
     // The order of the fields is important!
     "fields": {
