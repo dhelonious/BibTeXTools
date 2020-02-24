@@ -11,6 +11,9 @@ import sublime_plugin
 from .util import strip_punct, remove_accents
 
 
+ABBREVIATIONS = None
+
+
 def log(msg):
     if msg:
         print("[BibtexTools] {}".format(msg))
@@ -98,6 +101,12 @@ class Abbreviations():
         return pattern
 
 
+def plugin_loaded():
+    global ABBREVIATIONS
+
+    ABBREVIATIONS = Abbreviations()
+
+
 class BibtexToolsCommand(sublime_plugin.TextCommand):
 
     def __init__(self, *args, **kwargs):
@@ -106,7 +115,6 @@ class BibtexToolsCommand(sublime_plugin.TextCommand):
         self.fields = self.settings.get("fields")
         self.accents = self.settings.get("accents")
         self.accent_pattern = re.compile("|".join(list(self.accents)))
-        self.abbreviations = Abbreviations()
 
     def is_enabled(self):
         file_name = self.view.file_name()
@@ -333,7 +341,7 @@ class BibtexToolsCommand(sublime_plugin.TextCommand):
         return "https://doi.org/{}".format(doi)
 
     def get_abbreviation(self, name):
-        return self.abbreviations.get(name)
+        return ABBREVIATIONS.get(name)
 
 
 class BibtexToolsFormatCommand(BibtexToolsCommand):
