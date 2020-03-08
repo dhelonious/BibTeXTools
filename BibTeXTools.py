@@ -8,7 +8,7 @@ import urllib.request
 import sublime
 import sublime_plugin
 
-from .util import strip_punct, remove_accents
+from .util import strip_punct, remove_accents, capitalize
 
 
 ABBREVIATIONS = None
@@ -28,7 +28,7 @@ BibtexField = collections.namedtuple("BibtexField", "name value region")
 
 
 class Abbreviations():
-    """Tries to approximate the ISO-4 abbreviation
+    """Tries to approximate the ISO4 abbreviation
 
     Rules:
     * articles, conjunctions and prepositions are omitted (except at the beginning)
@@ -36,7 +36,8 @@ class Abbreviations():
     * diacritics are left as in the original title
     * words like Part, Series, Section should be omitted
     * single word titles (possibly with an article or preposition) are not abbreviated
-    * abbreviated words are capitalized
+    * abbreviated words are capitalized unless they are uppercase
+    * uppercase words and acronyms are preserved
     """
 
     def __init__(self):
@@ -45,6 +46,10 @@ class Abbreviations():
 
     def get(self, name):
         words = re.split(r"[^\w\d'’\-–&:\.]+", name)
+
+        if "arXiv" in words:
+            # NOTE: The "arXiv e-prints" journal title should not be abbreviated
+            return name
 
         if len(words) == 1:
             abbrev = words
@@ -66,7 +71,12 @@ class Abbreviations():
                 if strip_punct(_word) in ("", "Series", "Serie", "Ser", "Part", "Section", "Sect", "Sec"):
                     continue
 
-                abbrev.append(self._abbreviate(word))
+                if word.endswith("."):
+                    # Assume that word is an abbreviation if word ends with period
+                    # NOTE: This can improve the performance significantly
+                    abbrev.append(word)
+                else:
+                    abbrev.append(self._abbreviate(word))
 
         return " ".join(abbrev)
 
@@ -87,9 +97,9 @@ class Abbreviations():
                 if abbrev.endswith("-"):
                     abbrev = abbrev[:-1] + right
 
-                return abbrev.capitalize()
+                return capitalize(abbrev)
 
-        return word.capitalize()
+        return capitalize(word)
 
     def _prepare_ltwa(self, pattern):
         pattern = pattern.lower()

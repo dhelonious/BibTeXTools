@@ -1,11 +1,13 @@
 Some useful commands for writing and maintaining BibTeX files in Sublime Text 3
 
+
 BibTeXTools
 ###########
 
 This packages provides basic commands for formatting and sorting the entries in BibTeX files. It also includes a command to fetch BibTeX entries from a DOI in the clipboard. BibTeX entries are formatted according to the settings, where all fields in each entry type and their order are defined. Apart from the default BibTeX fields some common BibLaTeX fields like ``doi``, ``url``, and ``addendum`` are supported out of the box. Additional fields and entry types can be added in the user settings.
 
 BibTeXTools should be considered as a complement for `LaTeXTools`_ package, which already provides syntax highlighting for BibTeX files.
+
 
 Commands
 ========
@@ -46,6 +48,20 @@ Advanced settings
 
 Although this should not be necessary, title word abbreviations can be configured using the ``BibTeXTools (Abbreviations).sublime-settings`` file. See the comments in the settings file for more details.
 
+
+Approximation of the ISO4 standard
+==================================
+
+A simplified set of rules is applied to approximate the `ISO4`_ standard:
+* articles, conjunctions and prepositions are omitted (except at the beginning)
+* commas are removed, other punctuation is preserved
+* diacritics are left as in the original title
+* words like Part, Series, Section should be omitted
+* single word titles (possibly with an article or preposition) are not abbreviated
+* abbreviated words are capitalized unless they are uppercase
+* uppercase words and acronyms are preserved
+
+
 Acknowledgements
 ================
 
@@ -55,3 +71,4 @@ Acknowledgements
 .. _LaTeXTools: https://github.com/SublimeText/LaTeXTools
 .. _doi2bibSublime: https://github.com/monty5811/doi2bibSublime
 .. _abbrevIso: https://github.com/marcinwrochna/abbrevIso
+.. _ISO4: https://www.iso.org/standard/3569.html

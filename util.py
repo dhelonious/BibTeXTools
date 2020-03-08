@@ -11,3 +11,10 @@ def strip_punct(string):
 def remove_accents(string):
     return "".join([char for char in unicodedata.normalize("NFD", string)
                     if unicodedata.category(char) != "Mn"])
+
+
+def capitalize(string):
+    if string.isupper():
+        return string
+    else:
+        return string.capitalize()
