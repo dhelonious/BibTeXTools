@@ -2,13 +2,16 @@
 
 import re
 import difflib
+import threading
 import collections
 import urllib.request
 
 import sublime
 import sublime_plugin
 
+# pylint: disable=relative-beyond-top-level
 from .util import strip_punct, remove_accents, capitalize
+from .lib.thread_progress import ThreadProgress
 
 
 ABBREVIATIONS = None
@@ -496,3 +499,28 @@ class BibtexToolsFetchCommand(BibtexToolsCommand):
             self.view.insert(edit, self.view.sel()[0].begin(), entry)
         else:
             sublime.status_message("No valid DOI in clipboard")
+
+
+class BibtexToolsAsyncCommand(BibtexToolsCommand):
+
+    def run(self, edit):
+        thread = threading.Thread(target=self._run)
+        thread.start()
+        ThreadProgress(thread)
+
+    def _run(self, view):
+        raise NotImplementedError("This method must be implemented")
+
+
+class BibtexToolsFormatAsyncCommand(BibtexToolsAsyncCommand):
+
+    def _run(self):
+        view = sublime.active_window().active_view()
+        view.run_command("bibtex_tools_format")
+
+
+class BibtexToolsSortAsyncCommand(BibtexToolsAsyncCommand):
+
+    def _run(self):
+        view = sublime.active_window().active_view()
+        view.run_command("bibtex_tools_sort")

@@ -1,11 +1,11 @@
 [
     {
         "caption": "Format (BibTeX)",
-        "command": "bibtex_tools_format"
+        "command": "bibtex_tools_format_async"
     },
     {
         "caption": "Sort (BibTeX)",
-        "command": "bibtex_tools_sort"
+        "command": "bibtex_tools_sort_async"
     },
     {
         "caption": "Fetch Entry (BibTeX)",
