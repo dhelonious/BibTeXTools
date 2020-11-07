@@ -81,6 +81,7 @@
             "author",
             "editor",
             "title",
+            "booktitle",
             "volume",
             "number",
             "series",
